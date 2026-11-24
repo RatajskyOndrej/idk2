@@ -6,22 +6,18 @@ on:
 
 jobs:
   tests:
-      runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup and Run Tests
-        run:  |
-          docker-compose build
-          docker-compose run web rake db:setup
-          docker-compose run web rspec
+    uses: ./.github/workflows/test.yml  # use the callable tests job to run tests
   deploy:
     name: deploy
+    needs: [ tests ]
     runs-on: ubuntu-latest
     steps:
       - run: echo 'The triggering workflow succeeded deploying now'
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.13 # This is the action
         with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "agile-chamber-34431" #Must be unique in Heroku
+          heroku_email: "lizjohnson@thisisartium.com"
+          docker_heroku_process_type: web
           usedocker: true
